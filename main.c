@@ -7,7 +7,8 @@
 #include "header.h"
 
 int main(int argc, char *argv[]) {
-
+    printf("%s\n", argv[1]);
+    printf("%d\n", argc);
     /* Se manda como parámetro el nombre del archivo a codificar, se calculan
     las frecuencias, se construyen el montículo mínimo y se retorna el árbol de Huffman*/
     int tam = 0;
@@ -16,6 +17,12 @@ int main(int argc, char *argv[]) {
     TablaCodigo *tabla_Codigos = generarTablaCodigos (root, tam);
     imprimirCodigos (tabla_Codigos, tam);
     codificarArchivo ("archivo.txt", tabla_Codigos, tam);
+    guardarTabla (tabla_Codigos, tam);
+
+    /* Decodificación */
+    printf("TABLA RECUPERADA\n");
+    TablaCodigo *tabla = recuperarTabla ("Tabla.dat");
+    imprimirCodigos  (tabla, tam);
     system("pause");
     return 0;
 }

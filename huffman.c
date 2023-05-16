@@ -132,8 +132,6 @@ void codificarArchivo (char *inputFile, TablaCodigo *tabla, int tam) {
                 indiceBit = 0;
             }
         }
-
-        printf("Byte de salida: %x, Caracter correspondiente: %c\n", byte_Salida, byte_Salida);
     }
 
     fclose (archivo_entrada);

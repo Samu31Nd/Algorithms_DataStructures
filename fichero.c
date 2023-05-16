@@ -45,3 +45,61 @@ NodoHuffman *calcularFrecuencias (char *filename, int *longitud) {
     fclose(archivo_frecuencia);
     return construirArbolHuffman (frecuencias, *longitud);
 }
+/**
+ * Función para guardar la tabla de códigos para realizar la decodificación del archivo
+ * @param tabla: Tabla de Códigos
+ * @param tam: Tamaño de la tabla
+*/
+
+void guardarTabla (TablaCodigo *tabla, int tam) {
+    FILE *apf = fopen ("Tabla.dat", "wb");
+
+    if (apf == NULL) {
+        fprintf(stderr, "Error al crear el archivo.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // Escribimos la tabla de códigos
+    int i;
+    for (i = 0; i < tam; i++) {
+        fwrite (&tabla[i].byte, sizeof(unsigned char), 1, apf);
+        fwrite (&tabla[i].longitud, sizeof(int), 1, apf);
+        fwrite (&tabla[i].codigo,sizeof(unsigned char), 1, apf);
+    }
+
+    fclose (apf);
+}
+
+TablaCodigo *recuperarTabla (char *tableName) {
+    FILE *apf = fopen (tableName, "rb");
+
+    if (apf == NULL) {
+        fprintf(stderr, "Error al intentar abrir el archivo.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // Determinar el tamaño de la tabla
+    fseek (apf, 0, SEEK_END); 
+    long tam_Archivo = ftell (apf);
+
+    /**
+     *  Se calcula el tamaño de la tabla, tam_Archivo almacena la cantidad de bytes del archivo
+     *  restamos la cantidad de bytes de un entero y dividimos entre la suma del tamaño de
+     *  bytes que ocupa un byte, un entero, y otro byte
+     * */
+    int tam = (tam_Archivo - sizeof(int)) / (sizeof(unsigned char) + sizeof(int) + sizeof(unsigned char));
+
+    // Asginamos memoria a nuestra tabla
+    TablaCodigo *tabla = (TablaCodigo*) malloc(sizeof(unsigned char) * tam);
+    int i;
+
+    /* Para leer los datos, debemos de tomar en cuenta el orden en el que fueron escritos */
+    for (i = 0; i < tam; i++) {
+        fread (&tabla[i].byte, sizeof(unsigned char), 1, apf);
+        fread (&tabla[i].longitud, sizeof(int), 1, apf);
+        tabla[i].codigo =  (unsigned char*) malloc(sizeof(unsigned char) * tabla[i].longitud);
+        fread (&tabla[i].codigo,sizeof(unsigned char), 1, apf);   
+    }
+    fclose (apf);
+    return tabla;
+}
