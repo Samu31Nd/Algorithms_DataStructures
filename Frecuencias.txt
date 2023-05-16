@@ -1,0 +1,5 @@
+Byte: 61 Frecuencias: 6
+Byte: 62 Frecuencias: 5
+Byte: 63 Frecuencias: 4
+Byte: 64 Frecuencias: 4
+Byte: 65 Frecuencias: 2
