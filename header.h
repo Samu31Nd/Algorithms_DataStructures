@@ -44,7 +44,7 @@ NodoHuffman *calcularFrecuencias (char *filename, int *longitud);
 void inorden(NodoHuffman *root);
 int calcular_altura(NodoHuffman *root);
 TablaCodigo *generarTablaCodigos (NodoHuffman *root, int tam);
-void generarCodigosHuffman (NodoHuffman *root, unsigned char *codigo, TablaCodigo *tabla, int i, int indice);
+void generarCodigosHuffman (NodoHuffman *root, unsigned char *codigo, TablaCodigo *tabla, int i, int *indice);
 void imprimirCodigos (TablaCodigo *tablaCodigos, int tam);
 
 #endif 

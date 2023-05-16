@@ -32,12 +32,12 @@ int calcular_altura(NodoHuffman* root) {
 */
 
 TablaCodigo *generarTablaCodigos (NodoHuffman *root, int tam) {
-    TablaCodigo *tabla_Codigos = (TablaCodigo*) malloc(tam * sizeof(tabla_Codigos));
+    TablaCodigo *tabla_Codigos = (TablaCodigo*) malloc(tam * sizeof(TablaCodigo));
     int altura = calcular_altura (root);
     unsigned char *codigo =  (unsigned char*) malloc(altura * sizeof(unsigned char));
     int indice = 0;
     // Llamar función para recorrer el árbol y generar los códigos de Huffman 
-    generarCodigosHuffman (root, codigo, tabla_Codigos, 0, indice);
+    generarCodigosHuffman (root, codigo, tabla_Codigos, 0, &indice);
     return tabla_Codigos;
 }
 
@@ -50,7 +50,7 @@ TablaCodigo *generarTablaCodigos (NodoHuffman *root, int tam) {
  * @param indice: Se irá incrementando cada vez que tengamos el código de un byte
 */
 
-void generarCodigosHuffman (NodoHuffman *root, unsigned char *codigo, TablaCodigo *tabla, int i, int indice) {
+void generarCodigosHuffman (NodoHuffman *root, unsigned char *codigo, TablaCodigo *tabla, int i, int *indice) {
     // Si se tiene un hijo izquierdo
     if (root->left) {
         codigo[i] = '0';
@@ -65,16 +65,16 @@ void generarCodigosHuffman (NodoHuffman *root, unsigned char *codigo, TablaCodig
 
     // Si tenemos un nodo hoja, entonces ya llegamos a un byte.
     if (root->right == NULL && root->left == NULL) {
-        tabla[indice].byte = root->dato;
-        tabla[indice].longitud = i;
-        tabla[indice].codigo = (unsigned char *) malloc(sizeof(unsigned char) * i); // Asignamos memoria dinámica a cada código
+        tabla[*indice].byte = root->dato;
+        tabla[*indice].longitud = i;
+        tabla[*indice].codigo = (unsigned char *) malloc(sizeof(unsigned char) * i); // Asignamos memoria dinámica a cada código
          
         /* memcpy: Función para copiar un bloque de bytes de una dirección de memoria a otra*/
-        memcpy (tabla[indice].codigo, codigo, sizeof(unsigned char) * i);
-        tabla[indice].codigo[i] = '\0'; // Agregamos el caracter de fin de cadena
-        printf("Byte: %02x\n", tabla[indice].byte);
-        printf("Codigo: %s\n", tabla[indice].codigo);
-        (indice)++; 
+        memcpy (tabla[*indice].codigo, codigo, sizeof(unsigned char) * i);
+        tabla[*indice].codigo[i] = '\0'; // Agregamos el caracter de fin de cadena
+        printf("Byte: %02x\n", tabla[*indice].byte);
+        printf("Codigo: %s\n", tabla[*indice].codigo);
+        (*indice)++; 
        
     }
 
@@ -91,6 +91,6 @@ void imprimirCodigos (TablaCodigo *tablaCodigos, int tam) {
     int i, j;
     for(i = 0; i < tam; i++) {
         printf("Byte: %02x\t", tablaCodigos[i].byte);
-        
+        printf("Codigo generado: %s\n", tablaCodigos[i].codigo);   
     }
 }
