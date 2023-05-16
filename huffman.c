@@ -33,7 +33,8 @@ int calcular_altura(NodoHuffman* root) {
 
 TablaCodigo *generarTablaCodigos (NodoHuffman *root, int tam) {
     TablaCodigo *tabla_Codigos = (TablaCodigo*) malloc(tam * sizeof(tabla_Codigos));
-    unsigned char *codigo =  (unsigned char*) malloc(tam * sizeof(unsigned char));
+    int altura = calcular_altura (root);
+    unsigned char *codigo =  (unsigned char*) malloc(altura * sizeof(unsigned char));
     int indice = 0;
     // Llamar función para recorrer el árbol y generar los códigos de Huffman 
     generarCodigosHuffman (root, codigo, tabla_Codigos, 0, indice);
