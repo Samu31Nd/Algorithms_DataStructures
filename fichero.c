@@ -52,7 +52,7 @@ NodoHuffman *calcularFrecuencias (char *filename, int *longitud) {
 */
 
 void guardarTabla (TablaCodigo *tabla, int tam) {
-    FILE *apf = fopen ("Tabla.dat", "wb");
+    FILE *apf = fopen ("Tabla.bin", "wb");
 
     if (apf == NULL) {
         fprintf(stderr, "Error al crear el archivo.\n");
@@ -60,17 +60,12 @@ void guardarTabla (TablaCodigo *tabla, int tam) {
     }
 
     // Escribimos la tabla de códigos
-    int i;
-    for (i = 0; i < tam; i++) {
-        fwrite (&tabla[i].byte, sizeof(unsigned char), 1, apf);
-        fwrite (&tabla[i].longitud, sizeof(int), 1, apf);
-        fwrite (&tabla[i].codigo,sizeof(unsigned char), 1, apf);
-    }
-
+    fwrite (&tam, sizeof(int), 1, apf);
+    fwrite (tabla, sizeof(TablaCodigo), tam, apf);
     fclose (apf);
 }
 
-TablaCodigo *recuperarTabla (char *tableName) {
+TablaCodigo *recuperarTabla (char *tableName, int *tam_Tabla) {
     FILE *apf = fopen (tableName, "rb");
 
     if (apf == NULL) {
@@ -78,28 +73,17 @@ TablaCodigo *recuperarTabla (char *tableName) {
         exit(EXIT_FAILURE);
     }
 
-    // Determinar el tamaño de la tabla
-    fseek (apf, 0, SEEK_END); 
-    long tam_Archivo = ftell (apf);
-
-    /**
-     *  Se calcula el tamaño de la tabla, tam_Archivo almacena la cantidad de bytes del archivo
-     *  restamos la cantidad de bytes de un entero y dividimos entre la suma del tamaño de
-     *  bytes que ocupa un byte, un entero, y otro byte
-     * */
-    int tam = (tam_Archivo - sizeof(int)) / (sizeof(unsigned char) + sizeof(int) + sizeof(unsigned char));
-
-    // Asginamos memoria a nuestra tabla
-    TablaCodigo *tabla = (TablaCodigo*) malloc(sizeof(unsigned char) * tam);
-    int i;
-
-    /* Para leer los datos, debemos de tomar en cuenta el orden en el que fueron escritos */
-    for (i = 0; i < tam; i++) {
-        fread (&tabla[i].byte, sizeof(unsigned char), 1, apf);
-        fread (&tabla[i].longitud, sizeof(int), 1, apf);
-        tabla[i].codigo =  (unsigned char*) malloc(sizeof(unsigned char) * tabla[i].longitud);
-        fread (&tabla[i].codigo,sizeof(unsigned char), 1, apf);   
+    int tam;
+    fread(&tam, sizeof(int), 1, apf);
+    printf("El tam de la tabla es: %d\n", tam);
+    TablaCodigo *tabla_Recuperada = (TablaCodigo *) malloc (sizeof(TablaCodigo) * tam);
+    if (tabla_Recuperada == NULL) {
+        fprintf(stderr, "Error al asignar memoria a la tabla.\n");
+        exit(EXIT_FAILURE);
     }
+
+    // Recuperamos la tabla
+    fread (tabla_Recuperada, sizeof(TablaCodigo), tam, apf);
     fclose (apf);
-    return tabla;
+    return tabla_Recuperada;
 }

@@ -41,7 +41,7 @@ void mostrarHeap (minHeap *, int);
 /***** PROTOTIPOS FUNCIONES FICHERO.C *****/
 NodoHuffman *calcularFrecuencias (char *filename, int *longitud);
 void guardarTabla (TablaCodigo *tabla, int tam);
-TablaCodigo *recuperarTabla (char *tableName);
+TablaCodigo *recuperarTabla (char *tableName, int *tam_Tabla);
 /***** Árbol de Huffman (huffman.c) *****/
 void inorden(NodoHuffman *root);
 int calcular_altura(NodoHuffman *root);

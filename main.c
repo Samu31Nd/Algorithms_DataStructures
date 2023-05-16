@@ -21,8 +21,9 @@ int main(int argc, char *argv[]) {
 
     /* Decodificación */
     printf("TABLA RECUPERADA\n");
-    TablaCodigo *tabla = recuperarTabla ("Tabla.dat");
-    imprimirCodigos  (tabla, tam);
+    TablaCodigo *tabla = recuperarTabla ("Tabla.bin", &tam);
+    for (int i = 0; i < tam; i++)
+        printf("Codigo: %s\n", tabla[i].codigo);
     system("pause");
     return 0;
 }
