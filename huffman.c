@@ -72,12 +72,9 @@ void generarCodigosHuffman (NodoHuffman *root, unsigned char *codigo, TablaCodig
         /* memcpy: Función para copiar un bloque de bytes de una dirección de memoria a otra*/
         memcpy (tabla[*indice].codigo, codigo, sizeof(unsigned char) * i);
         tabla[*indice].codigo[i] = '\0'; // Agregamos el caracter de fin de cadena
-        printf("Byte: %02x\n", tabla[*indice].byte);
-        printf("Codigo: %s\n", tabla[*indice].codigo);
         (*indice)++; 
        
     }
-
 }
 
 
@@ -90,7 +87,78 @@ void generarCodigosHuffman (NodoHuffman *root, unsigned char *codigo, TablaCodig
 void imprimirCodigos (TablaCodigo *tablaCodigos, int tam) {
     int i, j;
     for(i = 0; i < tam; i++) {
-        printf("Byte: %02x\t", tablaCodigos[i].byte);
+        printf("Byte: %02x\t Caracter %c\t", tablaCodigos[i].byte, tablaCodigos[i].byte);
         printf("Codigo generado: %s\n", tablaCodigos[i].codigo);   
     }
+}
+
+/**
+ * Función implementada para codificar el archivo 
+ * @param inputFile: Es el archivo que vamos a codificar
+ * @param tabla: Es la tabla que contiene los bytes y los códigos que le corresponde a cada caracter
+ * @param tam: Tamaño de la tabla
+*/
+
+void codificarArchivo (char *inputFile, TablaCodigo *tabla, int tam) {
+    FILE *archivo_entrada = fopen (inputFile, "rb");
+    FILE *archivo_salida = fopen ("codificacion.dat", "wb");
+
+    if (archivo_entrada == NULL || archivo_salida == NULL) {
+        fprintf(stderr, "Error al abrir los archivos.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    unsigned char byte;
+    unsigned char byte_Salida =  0;
+    int indiceBit = 0;
+
+    while (fread(&byte, sizeof(unsigned char), 1, archivo_entrada) > 0) {
+        int pos = buscarCodigoLineal (tabla, tam, byte);
+        int longitud = tabla[pos].longitud;
+        unsigned char *codigo = tabla[pos].codigo;
+        int i;
+        
+        for (i = 0; i < longitud; i++) {
+            byte_Salida = byte_Salida << 1;
+            if (codigo[i] == '1')
+                PONE_1(byte_Salida, 0);
+            else   
+                PONE_0(byte_Salida, 0);
+            
+            indiceBit++;
+            if(indiceBit == 8) {
+                fwrite (&byte_Salida, sizeof(unsigned char), 1, archivo_salida);
+                byte_Salida = 0;
+                indiceBit = 0;
+            }
+        }
+
+        printf("Byte de salida: %x, Caracter correspondiente: %c\n", byte_Salida, byte_Salida);
+    }
+
+    fclose (archivo_entrada);
+    fclose (archivo_salida);
+}
+
+int buscarCodigoLineal (TablaCodigo *tabla, int tam, unsigned char byte) {
+    int i;
+    for (i = 0; i < tam; i++)
+        if (tabla[i].byte == byte)
+            return i;
+        
+    return -1;
+}
+
+/* Función de búsqueda binaria para buscar el byte */
+int buscarCodigo (TablaCodigo *tabla, int inicio, int final, unsigned char byte) {
+    if (inicio > final) 
+        return -1; // En caso de que no se encuentre el byte
+
+    int centro = (inicio + final) / 2;
+    if (tabla[centro].byte == byte)
+        return centro;
+    else if (byte < tabla[centro].byte)
+        return buscarCodigo (tabla, inicio, centro - 1, byte);
+    else 
+        return buscarCodigo (tabla, centro + 1, final, byte);
 }

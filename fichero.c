@@ -42,13 +42,6 @@ NodoHuffman *calcularFrecuencias (char *filename, int *longitud) {
         }
 
     fclose(apf);
+    fclose(archivo_frecuencia);
     return construirArbolHuffman (frecuencias, *longitud);
-}
-
-
-
-void consultarByte (unsigned char x) {
-    for(int i = 7; i >= 0; i--)
-        printf("%d", CONSULTARBIT(x,i));
-    printf("\n");
 }

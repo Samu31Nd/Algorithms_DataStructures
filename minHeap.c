@@ -116,7 +116,6 @@ NodoHuffman *construirArbolHuffman (int *frecuencias, int capacity) {
         if (frecuencias[i] != 0)
             insertarNodo (heap, crearNodoHuffman (i, frecuencias[i]));
 
-    mostrarHeap (heap, capacity);
     // Creamos el árbol de Huffman
     while (heap->size > 1) {
         NodoHuffman *left = extraerNodo(heap);
@@ -130,6 +129,11 @@ NodoHuffman *construirArbolHuffman (int *frecuencias, int capacity) {
     return extraerNodo (heap);
 }
 
+/**
+ *  Función creada para poder visualizar cómo estaban los nodos en el heap 
+ * @param heap: Es el montículo
+ * @param capacity: Es la capacidad del montículo
+ **/
 void mostrarHeap (minHeap *heap, int capacity) {
     int i;
     for (i = 0; i < capacity; i++)

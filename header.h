@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "bits.h"
 // Estructura de un nodo de árbol de Huffman
 typedef struct nodoHuffman {
     unsigned char dato;
@@ -46,5 +47,10 @@ int calcular_altura(NodoHuffman *root);
 TablaCodigo *generarTablaCodigos (NodoHuffman *root, int tam);
 void generarCodigosHuffman (NodoHuffman *root, unsigned char *codigo, TablaCodigo *tabla, int i, int *indice);
 void imprimirCodigos (TablaCodigo *tablaCodigos, int tam);
+void codificarArchivo (char *inputFile, TablaCodigo *tabla, int tam);
+
+/***** Algoritmo de Búsqueda Binaria ******/
+int buscarCodigo (TablaCodigo *tabla, int inicio, int final, unsigned char byte);
+int buscarCodigoLineal (TablaCodigo *tabla, int tam, unsigned char byte);
 
 #endif 
