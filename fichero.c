@@ -15,7 +15,7 @@
 */
 
 NodoHuffman *calcularFrecuencias (char *filename, int *longitud) {
-    FILE *apf = fopen ("archivo.txt", "rb");
+    FILE *apf = fopen (filename, "rb");
     int *frecuencias = (int*) calloc (256, sizeof(int));
     unsigned char *buffer = (unsigned char*) malloc (sizeof(unsigned char) * 1024);
     if (apf == NULL) {
@@ -23,14 +23,14 @@ NodoHuffman *calcularFrecuencias (char *filename, int *longitud) {
         exit(EXIT_FAILURE);
     }
 
-    //Calcular la cantidad de bytes del archivo
-    size_t bytesleidos = fread(buffer, sizeof(unsigned char), 1024, apf);
-    printf("Bytes leidos: %d\n", bytesleidos);
-    rewind(apf);
-    
+    // Determinar la cantidad de bytes
+    fseek (apf, 0, SEEK_END);
+    long bytesLeidos = ftell (apf);
+    rewind (apf);
+    printf("Bytes leidos: %d\n", bytesLeidos);
     // Calculamos frecuencias de caracteres
     unsigned char byte;
-    while(fread(&byte, sizeof(unsigned char), 1, apf) > 0) 
+    while(fread(&byte, sizeof(unsigned char), 1, apf) > 0)
         frecuencias[byte]++;
 
     // Construimos el archivo con la tabla de frecuencias
@@ -45,15 +45,16 @@ NodoHuffman *calcularFrecuencias (char *filename, int *longitud) {
     fclose(archivo_frecuencia);
     return construirArbolHuffman (frecuencias, *longitud);
 }
+
 /**
  * Función para guardar la tabla de códigos para realizar la decodificación del archivo
  * @param tabla: Tabla de Códigos
  * @param tam: Tamaño de la tabla
-*/
-
+ ***/
 void guardarTabla (TablaCodigo *tabla, int tam) {
-    FILE *apf = fopen ("Tabla.bin", "wb");
+    FILE *apf = fopen ("Tabla.bin", "wb"); // Abrimos el archivo donde almacenaremos la tabla
 
+    // Si no se puede crear o abrir el archivo, lanzamos un error
     if (apf == NULL) {
         fprintf(stderr, "Error al crear el archivo.\n");
         exit(EXIT_FAILURE);
@@ -65,17 +66,23 @@ void guardarTabla (TablaCodigo *tabla, int tam) {
     fclose (apf);
 }
 
+/**
+ * Función para recuperar la tabla de codigos del archivo tabla.code
+ * @param tableName: Es el nombre del archivo que almacena la tabla
+ * @param tam_Tabla: Es un apuntador para almacenar el tamaño de la tabla
+*/
+
 TablaCodigo *recuperarTabla (char *tableName, int *tam_Tabla) {
     FILE *apf = fopen (tableName, "rb");
-
+    // Si no se puede abrir el archivo
     if (apf == NULL) {
         fprintf(stderr, "Error al intentar abrir el archivo.\n");
         exit(EXIT_FAILURE);
     }
 
+    // El tamaño de la tabla está al inicio del archivo
     int tam;
     fread(&tam, sizeof(int), 1, apf);
-    printf("El tam de la tabla es: %d\n", tam);
     TablaCodigo *tabla_Recuperada = (TablaCodigo *) malloc (sizeof(TablaCodigo) * tam);
     if (tabla_Recuperada == NULL) {
         fprintf(stderr, "Error al asignar memoria a la tabla.\n");
@@ -84,6 +91,6 @@ TablaCodigo *recuperarTabla (char *tableName, int *tam_Tabla) {
 
     // Recuperamos la tabla
     fread (tabla_Recuperada, sizeof(TablaCodigo), tam, apf);
-    fclose (apf);
+    fclose (apf); // Cerramos el archivo
     return tabla_Recuperada;
 }

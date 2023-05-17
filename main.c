@@ -12,18 +12,17 @@ int main(int argc, char *argv[]) {
     /* Se manda como parámetro el nombre del archivo a codificar, se calculan
     las frecuencias, se construyen el montículo mínimo y se retorna el árbol de Huffman*/
     int tam = 0;
-    NodoHuffman *root = calcularFrecuencias ("Holaa", &tam);
+    NodoHuffman *root = calcularFrecuencias ("archivo.txt", &tam);
     /* Se determina la tabla de bytes con su código correspondiente */
     TablaCodigo *tabla_Codigos = generarTablaCodigos (root, tam);
-    imprimirCodigos (tabla_Codigos, tam);
     codificarArchivo ("archivo.txt", tabla_Codigos, tam);
     guardarTabla (tabla_Codigos, tam);
 
     /* Decodificación */
     printf("TABLA RECUPERADA\n");
     TablaCodigo *tabla = recuperarTabla ("Tabla.bin", &tam);
-    for (int i = 0; i < tam; i++)
-        printf("Codigo: %s\n", tabla[i].codigo);
+    imprimirCodigos (tabla, tam);
+    decodificar ("codificacion.dat", "Archivo2_Decodificado.txt", tabla, tam);
     system("pause");
     return 0;
 }
