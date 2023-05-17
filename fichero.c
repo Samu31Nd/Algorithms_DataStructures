@@ -47,50 +47,26 @@ NodoHuffman *calcularFrecuencias (char *filename, int *longitud) {
 }
 
 /**
- * Función para guardar la tabla de códigos para realizar la decodificación del archivo
- * @param tabla: Tabla de Códigos
- * @param tam: Tamaño de la tabla
- ***/
-void guardarTabla (TablaCodigo *tabla, int tam) {
-    FILE *apf = fopen ("Tabla.bin", "wb"); // Abrimos el archivo donde almacenaremos la tabla
-
-    // Si no se puede crear o abrir el archivo, lanzamos un error
-    if (apf == NULL) {
-        fprintf(stderr, "Error al crear el archivo.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    // Escribimos la tabla de códigos
-    fwrite (&tam, sizeof(int), 1, apf);
-    fwrite (tabla, sizeof(TablaCodigo), tam, apf);
-    fclose (apf);
-}
-
-/**
- * Función para recuperar la tabla de codigos del archivo tabla.code
- * @param tableName: Es el nombre del archivo que almacena la tabla
- * @param tam_Tabla: Es un apuntador para almacenar el tamaño de la tabla
+ * Función para recuperar la tabla de frecuencias y realizar la decodificación
+ * @param filename: Nombre del archivo de Frecuencias
+ * @param longitud: Se ira incrementando para determinar la longitud del arreglo de frecuencias
 */
-
-TablaCodigo *recuperarTabla (char *tableName, int *tam_Tabla) {
-    FILE *apf = fopen (tableName, "rb");
-    // Si no se puede abrir el archivo
-    if (apf == NULL) {
-        fprintf(stderr, "Error al intentar abrir el archivo.\n");
+int *recuperarFrecuencias (char *filename, int *longitud) {
+    FILE *archivo_Frecuencias =  fopen (filename, "r");
+    if(archivo_Frecuencias == NULL) {
+        fprintf(stderr, "Error al abrir el archivo.\n");
         exit(EXIT_FAILURE);
     }
 
-    // El tamaño de la tabla está al inicio del archivo
-    int tam;
-    fread(&tam, sizeof(int), 1, apf);
-    TablaCodigo *tabla_Recuperada = (TablaCodigo *) malloc (sizeof(TablaCodigo) * tam);
-    if (tabla_Recuperada == NULL) {
-        fprintf(stderr, "Error al asignar memoria a la tabla.\n");
-        exit(EXIT_FAILURE);
+    int *frecuencias = (int*) calloc (256, sizeof(int));
+    int byte;
+    int frecuencia;
+
+    while (fscanf(archivo_Frecuencias, "Byte: %x Frecuencias: %d\n", &byte, &frecuencia) != EOF) {
+        frecuencias[byte] = frecuencia;
+        (*longitud)++;
     }
 
-    // Recuperamos la tabla
-    fread (tabla_Recuperada, sizeof(TablaCodigo), tam, apf);
-    fclose (apf); // Cerramos el archivo
-    return tabla_Recuperada;
+    fclose (archivo_Frecuencias);
+    return frecuencias;
 }

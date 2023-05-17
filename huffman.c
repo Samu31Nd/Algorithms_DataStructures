@@ -117,7 +117,7 @@ void codificarArchivo (char *inputFile, TablaCodigo *tabla, int tam) {
         int longitud = tabla[pos].longitud; 
         unsigned char *codigo = tabla[pos].codigo;
         int i;
-        printf("Codigo: %s\n", codigo);
+        // printf("Codigo: %s\n", codigo);
         for (i = 0; i < longitud; i++) {
             if (codigo[i] == '1')
                 PONE_1(byte_Salida, indiceBit);
@@ -129,6 +129,9 @@ void codificarArchivo (char *inputFile, TablaCodigo *tabla, int tam) {
             if(indiceBit == 8) {
                 // printf("Byte de salida: %x\n", byte_Salida);
                 fwrite (&byte_Salida, sizeof(unsigned char), 1, archivo_salida);
+                for (int k = 7; k >= 0; k--)
+                    printf("%d", CONSULTARBIT(byte_Salida, k));
+                printf("\n");
                 byte_Salida = 0;
                 indiceBit = 0;
             }
@@ -154,50 +157,75 @@ void codificarArchivo (char *inputFile, TablaCodigo *tabla, int tam) {
  * Función para decodificar el archivo comprimido
  * @param name_codificado: Es el nombre del archivo codificado con extensión ".dat".
  * @param name_decodificado: Es el nombre del archivo original.
- * @param tabla: Es la tabla que contiene los códigos.
- * @param tam: Tamaño de la tabla.
+ * @param raiz: Es el arbol de Huffman
 */
 
-void decodificar (char *name_codificado, char *name_decodificado, TablaCodigo *tabla, int tam) {
-    FILE *codificado = fopen (name_codificado, "rb");
-    FILE *decodificado = fopen (name_decodificado, "wb");
+void decodificar (char *nombre_codificado, char *nombre_decodificado, NodoHuffman *raiz) {
+    FILE *codificado = fopen (nombre_codificado, "rb");
+    FILE *decodificado = fopen (nombre_decodificado, "wb");
 
-    printf("Vamos a decodificar\n");
-    if (codificado == NULL || decodificado == NULL) {
-        fprintf(stderr, "Error al abrir los archivos");
+    if (codificado == NULL || decodificado ==  NULL) {
+        fprintf(stderr, "Error al abrir los archivos.\n");
         exit(EXIT_FAILURE);
     }
 
-    int bits = 0;
+    NodoHuffman *nodo = raiz;
     unsigned char byte;
-    unsigned char byte_Entrada = 0;
-    // Leemos cada byte del archivo codificado
+    int bitsLeidos = 0;
+
     while (fread(&byte, sizeof(unsigned char), 1, codificado) > 0) {
         int i;
-        // Iniciamos en i = 7 para empezar desde el bit más significativo
+        printf("Byte a analizar: %d\n", byte);
+        byte = invertirIzqDer(byte);
+        // Iniciamos por el bit más significativo
         for (i = 7; i >= 0; i--) {
-            byte_Entrada = byte_Entrada << 1;
-            byte_Entrada = byte_Entrada | CONSULTARBIT (byte, i);
-            bits++;
+            if (CONSULTARBIT (byte, i) == 1) {
+                if(nodo->right != NULL)
+                    nodo = nodo->right;
+            }   else {
+                if (nodo->left != NULL) 
+                    nodo = nodo->left;
+            }
 
-            int posicion = buscarCodigoLineal (tabla, tam, byte_Entrada);
-            if (posicion >= 0) {    
-                fwrite (&(tabla[posicion].byte), sizeof (unsigned char), 1, decodificado);
-                byte_Entrada = 0;
-                bits = 0;
+            if (nodo->left == NULL && nodo->right == NULL) {
+                printf("Byte: %d\n", nodo->dato);
+                fwrite(&(nodo->dato), sizeof(unsigned char), 1, decodificado);
+                nodo = raiz; // Se regresa a la raíz
+            }
+
+            bitsLeidos++;
+
+            if (bitsLeidos == 8) {
+                printf("Ya son 8 bits\n");
+                bitsLeidos = 0;
+                break;
             }
         }
     }
 
-    // Si quedan bits pendientes en el último byte
-    if (bits > 0) {
-        byte_Entrada = byte_Entrada >> (8 - bits);
-        printf("Byte que se va a escribir: %x\n", byte_Entrada);
-        fwrite(&byte_Entrada, sizeof(unsigned char), 1, decodificado);
+    int bitsRestantes = 8 - bitsLeidos % 8;
+    if (bitsRestantes < 8) {
+        byte = byte >> bitsRestantes;
+        fwrite (&byte, sizeof(unsigned char), 1, decodificado);
+    }
+    fclose (codificado);
+    fclose (decodificado);
+}
+
+/**
+ * Función encargada de invertir los bits de izquierda a derecha para la decodificación del archivo
+ * @param byte: Byte que vamos a invertir
+*/
+unsigned char invertirIzqDer(unsigned char byte) {
+    unsigned char resultado = 0;
+    int i;
+
+    for (i = 0; i < 8; i++) {
+        if (CONSULTARBIT (byte, i))
+            CAMBIA(resultado, 7 - i); // Macro para invertir los bits de izquierda a derecha
     }
 
-    fclose(codificado);
-    fclose(decodificado);
+    return resultado;
 }
 
 int buscarCodigoLineal (TablaCodigo *tabla, int tam, unsigned char byte) {

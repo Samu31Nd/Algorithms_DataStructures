@@ -40,8 +40,7 @@ void mostrarHeap (minHeap *, int);
 
 /***** PROTOTIPOS FUNCIONES FICHERO.C *****/
 NodoHuffman *calcularFrecuencias (char *filename, int *longitud);
-void guardarTabla (TablaCodigo *tabla, int tam);
-TablaCodigo *recuperarTabla (char *tableName, int *tam_Tabla);
+int *recuperarFrecuencias (char *filename, int *longitud);
 
 /***** Árbol de Huffman (huffman.c) *****/
 void inorden(NodoHuffman *root);
@@ -50,7 +49,8 @@ TablaCodigo *generarTablaCodigos (NodoHuffman *root, int tam);
 void generarCodigosHuffman (NodoHuffman *root, unsigned char *codigo, TablaCodigo *tabla, int i, int *indice);
 void imprimirCodigos (TablaCodigo *tablaCodigos, int tam);
 void codificarArchivo (char *inputFile, TablaCodigo *tabla, int tam);
-void decodificar (char *nombre_codificado, char *name_decodificado, TablaCodigo *tabla, int tam);
+void decodificar (char *nombre_codificado, char *name_decodificado, NodoHuffman *raiz);
+unsigned char invertirIzqDer(unsigned char byte);
 /***** Algoritmo de Búsqueda ******/
 int buscarCodigo (TablaCodigo *tabla, int inicio, int final, unsigned char byte);
 int buscarCodigoLineal (TablaCodigo *tabla, int tam, unsigned char byte);

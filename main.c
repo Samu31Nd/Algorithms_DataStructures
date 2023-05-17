@@ -15,14 +15,16 @@ int main(int argc, char *argv[]) {
     NodoHuffman *root = calcularFrecuencias ("archivo.txt", &tam);
     /* Se determina la tabla de bytes con su código correspondiente */
     TablaCodigo *tabla_Codigos = generarTablaCodigos (root, tam);
-    codificarArchivo ("archivo.txt", tabla_Codigos, tam);
-    guardarTabla (tabla_Codigos, tam);
 
+    codificarArchivo ("archivo.txt", tabla_Codigos, tam);
+
+    imprimirCodigos (tabla_Codigos, tam);
     /* Decodificación */
-    printf("TABLA RECUPERADA\n");
-    TablaCodigo *tabla = recuperarTabla ("Tabla.bin", &tam);
-    imprimirCodigos (tabla, tam);
-    decodificar ("codificacion.dat", "Archivo2_Decodificado.txt", tabla, tam);
+    int longitud = 0;
+    // Recuperamos la frecuencias
+    int *frecuencias = recuperarFrecuencias ("Frecuencias.txt", &longitud);
+    NodoHuffman *root_B = construirArbolHuffman (frecuencias, longitud);
+    decodificar ("codificacion.dat", "Archivo_Decodificado.txt", root_B);
     system("pause");
     return 0;
 }
