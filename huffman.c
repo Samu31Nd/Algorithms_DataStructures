@@ -31,8 +31,8 @@ int calcular_altura(NodoHuffman* root) {
  * @return: Nos retorna la tabla con el código correspondiente a cada byte
 */
 
-TablaCodigo *generarTablaCodigos (NodoHuffman *root, int tam) {
-    TablaCodigo *tabla_Codigos = (TablaCodigo*) malloc(tam * sizeof(TablaCodigo));
+TablaCodigo *generarTablaCodigos (NodoHuffman *root) {
+    TablaCodigo *tabla_Codigos = calloc (sizeof(TablaCodigo), 256);
     int altura = calcular_altura (root);
     unsigned char *codigo =  (unsigned char*) malloc(altura * sizeof(unsigned char));
     int indice = 0;
@@ -63,15 +63,16 @@ void generarCodigosHuffman (NodoHuffman *root, unsigned char *codigo, TablaCodig
         generarCodigosHuffman (root->right, codigo, tabla, i + 1, indice);
     }
 
-    // Si tenemos un nodo hoja, entonces ya llegamos a un byte.
+    /* Si ambos apuntan a NULL, quiere decir que hemos llegado a un nodo hoja, entonces vamos a copiar
+    los datos en nuestra tabla en la posición 'root->dato' porque representar un número de la tabla ASCII */
     if (root->right == NULL && root->left == NULL) {
-        tabla[*indice].byte = root->dato;
-        tabla[*indice].longitud = i;
-        tabla[*indice].codigo = (unsigned char *) malloc(sizeof(unsigned char) * i); // Asignamos memoria dinámica a cada código
+        tabla[root->dato].byte = root->dato;
+        tabla[root->dato].longitud = i;
+        tabla[root->dato].codigo = (unsigned char *) malloc(sizeof(unsigned char) * i); // Asignamos memoria dinámica a cada código
          
-        /* memcpy: Función para copiar un bloque de bytes de una dirección de memoria a otra*/
-        memcpy (tabla[*indice].codigo, codigo, sizeof(unsigned char) * i);
-        tabla[*indice].codigo[i] = '\0'; // Agregamos el caracter de fin de cadena
+        /* memcpy: Función para copiar un bloque de bytes de una dirección de memoria a otra dirección de memoria*/
+        memcpy (tabla[root->dato].codigo, codigo, sizeof(unsigned char) * i);
+        tabla[root->dato].codigo[i] = '\0'; // Agregamos el caracter de fin de cadena
         (*indice)++; 
        
     }
@@ -80,15 +81,18 @@ void generarCodigosHuffman (NodoHuffman *root, unsigned char *codigo, TablaCodig
 
 /**
  * Función encargada de mostrar los codigos asignados a cada byte
- * @param tablaCodigos: Es una matriz donde se almacenaron los códigos correspondientes
- * después de realizar el recorrido del arbol de huffman
+ * @param tablaCodigos: Es la tabla doinde almacenamos los bytes con su correspondiente
+ * código asignado por el recorrido del árbol de Huffman.
+ * @param tam: Es el tamaño de la tabla, su valo máximo es 255
  **/
 
 void imprimirCodigos (TablaCodigo *tablaCodigos, int tam) {
     int i, j;
     for(i = 0; i < tam; i++) {
-        printf("Byte: %02x\t", tablaCodigos[i].byte, tablaCodigos[i].byte);
-        printf("Codigo generado: %s\n", tablaCodigos[i].codigo);   
+        if (tablaCodigos[i].codigo != NULL) {
+            printf("Byte: %02d\t", tablaCodigos[i].byte, tablaCodigos[i].byte);
+            printf("Codigo generado: %s\n", tablaCodigos[i].codigo); 
+        }  
     }
 }
 
@@ -96,10 +100,11 @@ void imprimirCodigos (TablaCodigo *tablaCodigos, int tam) {
  * Función implementada para codificar el archivo 
  * @param inputFile: Es el archivo que vamos a codificar
  * @param tabla: Es la tabla que contiene los bytes y los códigos que le corresponde a cada caracter
- * @param tam: Tamaño de la tabla
+ * @param tam: Tamaño de la tabla que es a lo mucho de 255 
+ * @param bytesCodificado: Almacena la cantidad de bytes después de la codificación
 */
 
-void codificarArchivo (char *inputFile, TablaCodigo *tabla, int tam) {
+void codificarArchivo (char *inputFile, TablaCodigo *tabla, int tam, long *bytesCodificado) {
     FILE *archivo_entrada = fopen (inputFile, "rb");
     FILE *archivo_salida = fopen ("codificacion.dat", "wb");
 
@@ -117,7 +122,6 @@ void codificarArchivo (char *inputFile, TablaCodigo *tabla, int tam) {
         int longitud = tabla[pos].longitud; 
         unsigned char *codigo = tabla[pos].codigo;
         int i;
-        // printf("Codigo: %s\n", codigo);
         for (i = 0; i < longitud; i++) {
             if (codigo[i] == '1')
                 PONE_1(byte_Salida, indiceBit);
@@ -127,10 +131,7 @@ void codificarArchivo (char *inputFile, TablaCodigo *tabla, int tam) {
 
             indiceBit++;
             if(indiceBit == 8) {
-                // printf("Byte de salida: %x\n", byte_Salida);
                 fwrite (&byte_Salida, sizeof(unsigned char), 1, archivo_salida);
-                for (int k = 7; k >= 0; k--)
-                    printf("%d", CONSULTARBIT(byte_Salida, k));
                 printf("\n");
                 byte_Salida = 0;
                 indiceBit = 0;
@@ -140,17 +141,24 @@ void codificarArchivo (char *inputFile, TablaCodigo *tabla, int tam) {
 
     // En caso de que queden bit sin escribir, debemos completar el byte con ceros
     if (indiceBit > 0) {
+        printf("Sobran %d Bits, byte %x\n", indiceBit, byte_Salida);
         while (indiceBit < 8) {
             PONE_0(byte_Salida, indiceBit);
             indiceBit++;
         }
         // printf("Byte de salida: %x\n", byte_Salida);
         fwrite(&byte_Salida, sizeof (unsigned char), 1, archivo_salida);
+        printf("Ultimo Byte: %x\n", byte_Salida);
     }
 
     fclose (archivo_entrada);
+    rewind (archivo_salida);
+    fseek (archivo_salida, 0, SEEK_END);
+    *bytesCodificado = ftell (archivo_salida);
     fclose (archivo_salida);
     printf("CODIFICACION EXITOSA\n");
+   
+
 }
 
 /**
@@ -172,10 +180,15 @@ void decodificar (char *nombre_codificado, char *nombre_decodificado, NodoHuffma
     NodoHuffman *nodo = raiz;
     unsigned char byte;
     int bitsLeidos = 0;
+    int totalBits = 0;
+    // Calculamos los bytes del archivo codificado
+    fseek(codificado, 0, SEEK_END);
+    long bytes = ftell(codificado); // Calculamos la cantidad de Bytes
+    rewind (codificado); // Regresamos al inicio del archivo
+    printf("Cantidad de Bytes de archivo codificado: %ld\n", bytes);
 
     while (fread(&byte, sizeof(unsigned char), 1, codificado) > 0) {
         int i;
-        printf("Byte a analizar: %d\n", byte);
         byte = invertirIzqDer(byte);
         // Iniciamos por el bit más significativo
         for (i = 7; i >= 0; i--) {
@@ -186,28 +199,29 @@ void decodificar (char *nombre_codificado, char *nombre_decodificado, NodoHuffma
                 if (nodo->left != NULL) 
                     nodo = nodo->left;
             }
+            
+            bitsLeidos++;
+            totalBits++;
 
+            // En caso de que lleguemos con un nodo hijo
             if (nodo->left == NULL && nodo->right == NULL) {
-                printf("Byte: %d\n", nodo->dato);
                 fwrite(&(nodo->dato), sizeof(unsigned char), 1, decodificado);
                 nodo = raiz; // Se regresa a la raíz
             }
 
-            bitsLeidos++;
-
             if (bitsLeidos == 8) {
-                printf("Ya son 8 bits\n");
                 bitsLeidos = 0;
                 break;
             }
         }
     }
 
-    int bitsRestantes = 8 - bitsLeidos % 8;
-    if (bitsRestantes < 8) {
-        byte = byte >> bitsRestantes;
-        fwrite (&byte, sizeof(unsigned char), 1, decodificado);
-    }
+    /* Van a quedar bits que sobran entonces eso hará que decodifique bytes que no pertenecen
+    al archivo original */
+
+
+
+    // Cerramos ambos archivos
     fclose (codificado);
     fclose (decodificado);
 }
@@ -235,20 +249,4 @@ int buscarCodigoLineal (TablaCodigo *tabla, int tam, unsigned char byte) {
             return i;
         
     return -1;
-}
-
-
-
-/* Función de búsqueda binaria para buscar el byte */
-int buscarCodigo (TablaCodigo *tabla, int inicio, int final, unsigned char byte) {
-    if (inicio > final) 
-        return -1; // En caso de que no se encuentre el byte
-
-    int centro = (inicio + final) / 2;
-    if (tabla[centro].byte == byte)
-        return centro;
-    else if (byte < tabla[centro].byte)
-        return buscarCodigo (tabla, inicio, centro - 1, byte);
-    else 
-        return buscarCodigo (tabla, centro + 1, final, byte);
 }

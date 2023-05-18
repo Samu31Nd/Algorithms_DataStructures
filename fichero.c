@@ -14,7 +14,7 @@
  * @param longitud: Longitud del arreglo de frecuencias
 */
 
-NodoHuffman *calcularFrecuencias (char *filename, int *longitud) {
+NodoHuffman *calcularFrecuencias (char *filename, int *longitud, long *cantidadBytesArchivo) {
     FILE *apf = fopen (filename, "rb");
     int *frecuencias = (int*) calloc (256, sizeof(int));
     unsigned char *buffer = (unsigned char*) malloc (sizeof(unsigned char) * 1024);
@@ -25,9 +25,8 @@ NodoHuffman *calcularFrecuencias (char *filename, int *longitud) {
 
     // Determinar la cantidad de bytes
     fseek (apf, 0, SEEK_END);
-    long bytesLeidos = ftell (apf);
+    *cantidadBytesArchivo = ftell (apf);
     rewind (apf);
-    printf("Bytes leidos: %d\n", bytesLeidos);
     // Calculamos frecuencias de caracteres
     unsigned char byte;
     while(fread(&byte, sizeof(unsigned char), 1, apf) > 0)

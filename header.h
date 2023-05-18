@@ -32,23 +32,25 @@ NodoHuffman *crearNodoHuffman (unsigned char, int);
 minHeap *crearHeap (int capacity);
 void insertarNodo (minHeap*, NodoHuffman*);
 void minHeapify (minHeap*, int);
-NodoHuffman *extraerNodo (minHeap*);
-NodoHuffman *construirArbolHuffman (int *, int);
+NodoHuffman *extraerNodo (minHeap *);
+NodoHuffman *construirArbolHuffman (int *frecuencias, int longitudArrFrecuencias);
 
 //Mostrar el Heap para ver las frecuencias
 void mostrarHeap (minHeap *, int);
 
 /***** PROTOTIPOS FUNCIONES FICHERO.C *****/
-NodoHuffman *calcularFrecuencias (char *filename, int *longitud);
+NodoHuffman *calcularFrecuencias (char *filename, int *longitud, long *cantidadBytesArchivo);
 int *recuperarFrecuencias (char *filename, int *longitud);
 
 /***** Árbol de Huffman (huffman.c) *****/
 void inorden(NodoHuffman *root);
 int calcular_altura(NodoHuffman *root);
-TablaCodigo *generarTablaCodigos (NodoHuffman *root, int tam);
+
+TablaCodigo *generarTablaCodigos (NodoHuffman *root);
 void generarCodigosHuffman (NodoHuffman *root, unsigned char *codigo, TablaCodigo *tabla, int i, int *indice);
 void imprimirCodigos (TablaCodigo *tablaCodigos, int tam);
-void codificarArchivo (char *inputFile, TablaCodigo *tabla, int tam);
+
+void codificarArchivo (char *inputFile, TablaCodigo *tabla, int tam, long *bytesCodificado);
 void decodificar (char *nombre_codificado, char *name_decodificado, NodoHuffman *raiz);
 unsigned char invertirIzqDer(unsigned char byte);
 /***** Algoritmo de Búsqueda ******/
