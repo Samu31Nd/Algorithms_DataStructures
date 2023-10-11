@@ -1,5 +1,15 @@
-#include "header.h"
+/**
+ * @author: Serge Eduardo Martínez Ramírez
+ * @name: Algoritmo de Huffman (Compresión de Archivos)
+ * @file: minHeap.c 
+ * @date: 07/05/2023
+ * @authors: Sic Mundus
+ * Escuela Superior de Cómputo **/
 
+#include "header.h"
+//*****************************************************************
+//                Crear un nodo Huffman                       
+//*****************************************************************
 /**
  * Función encargada de crear un nodo del árbol de Huffman dada
  * su frecuencia y el byte más recurrente 
@@ -16,6 +26,9 @@ NodoHuffman *crearNodoHuffman (unsigned char dato, int frecuencia) {
     return nuevoNodo;
 }
 
+//*****************************************************************
+//                Crear un montículo mini
+//*****************************************************************
 /** Crea el montículo mínimo donde sus nodos son estructuras NodoHuffman 
  * @param capacity: Es la capacidad del montículo, determinada por la cantidad de bytes 
  **/
@@ -27,6 +40,10 @@ minHeap *crearHeap (int capacity) {
     heap->size = 0;
     return heap;
 }
+
+//*****************************************************************
+//                Función para insertar un nodo                      
+//*****************************************************************
 
 /**
  * Función encargada de insertar un nuevo nodo en el montículo mínimo.
@@ -55,6 +72,9 @@ void insertarNodo (minHeap *heap, NodoHuffman *nodo) {
     heap->arreglo[i] = nodo; // Se inserta el nuevo nodo
 }
 
+//*****************************************************************
+//                Equilibrar un montículo mínimo
+//*****************************************************************
 /**
  * minHeapify:
  * Se encarga de mantener la propiedad de un heap mini después de haber realizado la extracción
@@ -90,6 +110,9 @@ void minHeapify (minHeap *heap, int indice) {
     }
 }
 
+//*****************************************************************
+//                Extraer nodo del montículo
+//*****************************************************************
 /**
  * extraerNodo:
  * Se encarga de extraer el nodo mínimo del montículo y llama a la función minHeapify
@@ -106,8 +129,13 @@ NodoHuffman *extraerNodo (minHeap *heap) {
     return extraido;
 }
 
-/* Función encargada de construir un heap, dadas las frecuencias y los bytes
-    @param frecuencias: Es un arreglo que contiene las frecuencias de cada byte */
+//*****************************************************************
+//                Construir un árbol de Huffman 
+//*****************************************************************
+/** Función encargada de construir un heap, dadas las frecuencias y los bytes
+ *  @param frecuencias: Es un arreglo que contiene las frecuencias de cada byte 
+ *  @param capacity: La capacidad del montículo.
+ * */
 
 NodoHuffman *construirArbolHuffman (int *frecuencias, int capacity) {
     int i;
@@ -127,16 +155,4 @@ NodoHuffman *construirArbolHuffman (int *frecuencias, int capacity) {
     }
 
     return extraerNodo (heap);
-}
-
-/**
- *  Función creada para poder visualizar cómo estaban los nodos en el heap 
- * @param heap: Es el montículo
- * @param capacity: Es la capacidad del montículo
- **/
-void mostrarHeap (minHeap *heap, int capacity) {
-    int i;
-    for (i = 0; i < capacity; i++)
-        printf("Byte: %x Frecuencia: %u\n", heap->arreglo[i]->dato, heap->arreglo[i]->frecuencia);
-    printf("\n");
 }

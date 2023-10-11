@@ -1,8 +1,10 @@
 /**
- * fichero.c:
- * Archivo que contiene las funciones para manipular los archivos de entrada y salida,
- * generar el archivo con la tabla de frecuencias, etc.
-*/
+ * @author: Serge Eduardo Martínez Ramírez
+ * @name: Algoritmo de Huffman (Compresión de Archivos)
+ * @file: fichero.c
+ * @date: 07/05/2023
+ * @authors: Serge Eduaro Martínez Ramírez
+ * Escuela Superior de Cómputo **/
 
 #include "header.h"
 #include "bits.h"
